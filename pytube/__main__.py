@@ -116,6 +116,24 @@ class YouTube(object):
             self.player_config_args = extract.get_ytplayer_config(
                 self.watch_html,
             )['args']
+# ---> ADD THIS PART <---
+            if 'title' not in self.player_config_args:
+                # for more reliability when parsing, we may use a trained parser
+                try:
+                    from bs4 import BeautifulSoup
+                    soup = BeautifulSoup(self.watch_html, 'lxml')
+                    title = soup.title.get_text().strip()
+                except ModuleNotFoundError:
+                    # since this parsing is actually pretty simple, we may just 
+                    # parse it using index()
+                    i_start = self.watch_html.lower().index('<title>') + len('<title>')
+                    i_end = self.watch_html.lower().index('</title>')
+                    title = self.watch_html[i_start:i_end].strip()
+                # remove the ' - youtube' part that is added to the browser tab's title
+                index = title.lower().rfind(' - youtube')
+                title = title[:index] if index > 0 else title
+                self.player_config_args['title'] = title
+            # / ---> ADD THIS PART <---
 
         self.vid_descr = extract.get_vid_descr(self.watch_html)
         # https://github.com/nficano/pytube/issues/165

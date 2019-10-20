@@ -194,7 +194,7 @@ class Stream(object):
         :returns:
             An os file system compatible filename.
         """
-
+	
         filename = safe_filename(self.title)
         return '{filename}.{s.subtype}'.format(filename=filename, s=self)
 
